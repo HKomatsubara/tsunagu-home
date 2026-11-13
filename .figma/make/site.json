@@ -1,0 +1,12 @@
+{
+  "title": "つなぐHome｜障がい者グループホーム検索",
+  "description": "名古屋市・大阪市・神戸市・京都市の障がい者グループホームを検索し、施設情報や写真を比較できます。見学先選びを安心して進められます。",
+  "language": "ja",
+  "robots": {
+    "index": true
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
