@@ -830,7 +830,9 @@ footer > small {
 
 .visit-modal {
   position: relative;
-  width: 540px;
+  width: 640px;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
   padding: 34px;
   border-radius: 20px;
   background: #fffdf9;
@@ -874,29 +876,234 @@ footer > small {
   font-size: 25px;
 }
 
-.visit-modal > img {
-  width: 100%;
-  height: 190px;
+.visit-summary {
+  margin-bottom: 18px;
+  padding: 10px;
   border-radius: 12px;
-  object-fit: cover;
-}
-
-.modal-message {
-  margin: 20px 0;
-  padding: 17px 18px;
-  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
   background: #fff4e6;
 }
 
-.modal-message strong {
-  color: #c75524;
-  font-size: 17px;
+.visit-summary img {
+  width: 105px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
 }
 
-.modal-message p {
-  margin-top: 7px;
+.visit-summary span {
+  color: #c75524;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.visit-summary p {
+  margin-top: 4px;
   color: #786658;
-  font-size: 12px;
+  font-size: 11px;
+}
+
+.visit-calendar {
+  padding: 17px 20px 20px;
+  border: 1px solid #eadccf;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.calendar-header {
+  margin-bottom: 15px;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  text-align: center;
+}
+
+.calendar-header strong {
+  color: #4d4037;
+  font-family: "Zen Maru Gothic", sans-serif;
+  font-size: 18px;
+}
+
+.calendar-header button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ead8c8;
+  border-radius: 50%;
+  color: #d65f2b;
+  background: #fff8f1;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.calendar-header button:hover:not(:disabled) {
+  background: #ffead8;
+}
+
+.calendar-header button:disabled {
+  cursor: default;
+  opacity: 0.25;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.weekday {
+  padding: 2px 0 6px;
+  color: #938073;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.weekday:first-child {
+  color: #d46b56;
+}
+
+.weekday:nth-child(7) {
+  color: #5b80a0;
+}
+
+.calendar-day {
+  height: 42px;
+  border: 0;
+  border-radius: 8px;
+  color: #55463b;
+  background: #fffaf5;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.calendar-day:hover:not(:disabled):not(.selected) {
+  color: #c95524;
+  background: #ffead8;
+}
+
+.calendar-day.selected {
+  color: #fff;
+  background: #e8662d;
+  box-shadow: 0 3px 0 #bd4516;
+}
+
+.calendar-day:disabled {
+  cursor: default;
+  color: #c8beb7;
+  background: transparent;
+  text-decoration: line-through;
+}
+
+.selected-date {
+  min-height: 58px;
+  margin: 15px 0 12px;
+  padding: 11px 15px;
+  border-left: 4px solid #e8662d;
+  border-radius: 5px 9px 9px 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff6eb;
+}
+
+.selected-date span {
+  color: #8b7565;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.selected-date strong {
+  color: #c65424;
+  font-size: 15px;
+}
+
+.visit-submit {
+  width: 100%;
+  height: 58px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #fff;
+  background: #e86129;
+  box-shadow: 0 4px 0 #bd4516;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.visit-submit svg {
+  width: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.visit-submit:hover:not(:disabled) {
+  background: #f17135;
+  transform: translateY(-1px);
+}
+
+.visit-submit:disabled {
+  cursor: default;
+  color: #b7aaa1;
+  background: #e7dfd8;
+  box-shadow: 0 4px 0 #ccc0b8;
+}
+
+.modal-note {
+  margin-top: 10px;
+  color: #a18e80;
+  font-size: 10px;
+  text-align: center;
+}
+
+.visit-complete {
+  padding: 25px 20px 5px;
+  text-align: center;
+}
+
+.complete-mark {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #739a61;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.visit-complete > strong {
+  display: block;
+  color: #4c3e34;
+  font-family: "Zen Maru Gothic", sans-serif;
+  font-size: 21px;
+}
+
+.visit-complete > p {
+  margin: 14px 0 9px;
+  padding: 13px;
+  border-radius: 8px;
+  color: #c75524;
+  background: #fff4e6;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.visit-complete > small {
+  display: block;
+  margin-bottom: 23px;
+  color: #8a7768;
+  font-size: 11px;
   line-height: 1.7;
 }
 

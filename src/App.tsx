@@ -101,6 +101,20 @@ const homes: Home[] = [
 
 const areas = ["名古屋市", "大阪市", "神戸市", "京都市"];
 const disabilityTypes = ["身体障がい", "知的障がい", "精神障がい", "発達障がい"];
+const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function formatVisitDate(date: Date) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  }).format(date);
+}
 
 function SearchIcon() {
   return (
@@ -133,6 +147,11 @@ export default function App() {
   const [disability, setDisability] = useState("");
   const [applied, setApplied] = useState({ area: "", disability: "" });
   const [selectedHome, setSelectedHome] = useState<Home | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [requestSent, setRequestSent] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+  );
   const resultsRef = useRef<HTMLElement>(null);
 
   const results = useMemo(
@@ -155,6 +174,37 @@ export default function App() {
     setDisability("");
     setApplied({ area: "", disability: "" });
   };
+
+  const openVisitModal = (home: Home) => {
+    const today = new Date();
+    setSelectedHome(home);
+    setSelectedDate(null);
+    setRequestSent(false);
+    setCalendarMonth(new Date(today.getFullYear(), today.getMonth(), 1));
+  };
+
+  const closeVisitModal = () => {
+    setSelectedHome(null);
+    setSelectedDate(null);
+    setRequestSent(false);
+  };
+
+  const calendarDays = useMemo(() => {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    return [
+      ...Array.from({ length: firstWeekday }, () => null),
+      ...Array.from({ length: daysInMonth }, (_, index) => new Date(year, month, index + 1)),
+    ];
+  }, [calendarMonth]);
+
+  const today = startOfDay(new Date());
+  const latestVisitDate = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
+  const earliestMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const latestMonth = new Date(latestVisitDate.getFullYear(), latestVisitDate.getMonth(), 1);
 
   return (
     <div className="min-h-screen bg-[#fffaf2] text-[#3d342d]">
@@ -302,7 +352,7 @@ export default function App() {
                         <br />
                         <strong>見学</strong>でゆっくり確かめられます。
                       </p>
-                      <button className="visit-button" onClick={() => setSelectedHome(home)}>
+                      <button className="visit-button" onClick={() => openVisitModal(home)}>
                         <span>
                           このホームを
                           <b>見学する</b>
@@ -362,11 +412,7 @@ export default function App() {
       </footer>
 
       {selectedHome && (
-        <div
-          className="modal-backdrop"
-          role="presentation"
-          onMouseDown={() => setSelectedHome(null)}
-        >
+        <div className="modal-backdrop" role="presentation" onMouseDown={closeVisitModal}>
           <div
             className="visit-modal"
             role="dialog"
@@ -374,25 +420,105 @@ export default function App() {
             aria-labelledby="modal-title"
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <button
-              className="modal-close"
-              onClick={() => setSelectedHome(null)}
-              aria-label="閉じる"
-            >
+            <button className="modal-close" onClick={closeVisitModal} aria-label="閉じる">
               ×
             </button>
             <p className="modal-kicker">見学のご案内</p>
             <h2 id="modal-title">{selectedHome.name}</h2>
-            <img src={selectedHome.image} alt="" />
-            <div className="modal-message">
-              <strong>見学リクエストを受け付けました</strong>
-              <p>
-                これはデモ画面です。実際のサービスでは、このあとご希望の日程や連絡先を入力します。
-              </p>
-            </div>
-            <button className="modal-done" onClick={() => setSelectedHome(null)}>
-              ホームの一覧に戻る
-            </button>
+            {!requestSent ? (
+              <>
+                <div className="visit-summary">
+                  <img src={selectedHome.image} alt="" />
+                  <div>
+                    <span>見学希望日を選択</span>
+                    <p>ご都合のよい日をカレンダーからお選びください。</p>
+                  </div>
+                </div>
+                <div className="visit-calendar">
+                  <div className="calendar-header">
+                    <button
+                      aria-label="前の月"
+                      disabled={calendarMonth <= earliestMonth}
+                      onClick={() =>
+                        setCalendarMonth(
+                          new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1),
+                        )
+                      }
+                    >
+                      ‹
+                    </button>
+                    <strong>
+                      {calendarMonth.getFullYear()}年 {calendarMonth.getMonth() + 1}月
+                    </strong>
+                    <button
+                      aria-label="次の月"
+                      disabled={calendarMonth >= latestMonth}
+                      onClick={() =>
+                        setCalendarMonth(
+                          new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1),
+                        )
+                      }
+                    >
+                      ›
+                    </button>
+                  </div>
+                  <div className="calendar-grid">
+                    {weekdays.map((day) => (
+                      <span className="weekday" key={day}>
+                        {day}
+                      </span>
+                    ))}
+                    {calendarDays.map((date, index) =>
+                      date ? (
+                        <button
+                          key={date.toISOString()}
+                          className={
+                            selectedDate?.getTime() === date.getTime()
+                              ? "calendar-day selected"
+                              : "calendar-day"
+                          }
+                          disabled={date < today || date > latestVisitDate}
+                          aria-label={`${formatVisitDate(date)}を選択`}
+                          aria-pressed={selectedDate?.getTime() === date.getTime()}
+                          onClick={() => setSelectedDate(date)}
+                        >
+                          {date.getDate()}
+                        </button>
+                      ) : (
+                        <span key={`empty-${index}`} />
+                      ),
+                    )}
+                  </div>
+                </div>
+                <div className="selected-date">
+                  <span>選択した希望日</span>
+                  <strong>
+                    {selectedDate ? formatVisitDate(selectedDate) : "日付を選択してください"}
+                  </strong>
+                </div>
+                <button
+                  className="visit-submit"
+                  disabled={!selectedDate}
+                  onClick={() => setRequestSent(true)}
+                >
+                  この日程で見学を申し込む
+                  <ArrowIcon />
+                </button>
+                <p className="modal-note">デモ画面のため、実際の申し込みや送信は行われません。</p>
+              </>
+            ) : (
+              <div className="visit-complete">
+                <span className="complete-mark" aria-hidden="true">
+                  ✓
+                </span>
+                <strong>見学リクエストを受け付けました</strong>
+                <p>{selectedDate && formatVisitDate(selectedDate)}</p>
+                <small>実際のサービスでは、施設からのご連絡をもって日程確定となります。</small>
+                <button className="modal-done" onClick={closeVisitModal}>
+                  ホームの一覧に戻る
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
